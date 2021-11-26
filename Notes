@@ -1,0 +1,7 @@
+To do:
+Show boxplot of raw response variable & histogram
+Show residual plots (y = residuals, x = response variable, use abline to add line for 0)
+Show histogram of residuals?
+Reasons to remove the outliers: I chose to remove the outliers, in this case the largest values, because my research question is interested in the values closer to 0. 
+This improves the statistical significance of my data and avoids outliers overly influencing my regression. 
+Consider transformations and at least discuss it in the presentation.
