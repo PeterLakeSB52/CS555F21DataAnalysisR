@@ -1,7 +1,17 @@
 #setwd("C:/Users/Peter's Laptop/Documents/CS555F21DataAnalysisR")
+install.packages("geosphere")
+library(geosphere)
 
 #Read CSV files 
 data = read.csv("240_Feeder_data.csv", header = TRUE)
+
+#Calculate distance from Unis to BU
+lon = as.vector(data$Longitude)
+lat = as.vector(data$Latitude)
+BULon = as.vector(rep(-71.10640804519835, times=239))
+BULat = as.vector(rep(42.350252194515846, times=239))
+distance = distHaversine(cbind(lon, lat), cbind(BULon, BULat))
+data$distance = round((distance*0.000621371), 2)
 
 #Distribution of response variable
 hist(data$BU_2020_Apps)
