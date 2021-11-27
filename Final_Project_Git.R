@@ -1,4 +1,4 @@
-setwd("C:/Users/Peter's Laptop/Documents/CS555F21DataAnalysisR")
+#setwd("C:/Users/Peter's Laptop/Documents/CS555F21DataAnalysisR")
 
 #Read CSV files 
 data = read.csv("240_Feeder_data.csv", header = TRUE)
