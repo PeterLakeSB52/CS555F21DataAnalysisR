@@ -21,10 +21,20 @@ boxplot(data$BU_2020_Apps)
 #Distribution of response variable after ln transformation
 hist(log(data$BU_2020_Apps))
 data$BU_Log_Apps = log(data$BU_2020_Apps)
+#Removing negative inf values
+data = data[data$BU_Log_Apps>=0,]
 
 #Scatterplot matrix
-pairs(data[,10:16], pch = 19, col = "dodgerblue")
+data = data[,c(4,7,8,9,16,10,11,12,13,14,15)]
+pairs(data[,5:11], pch = 19, col = "dodgerblue")
 
+#Correlation coefficients
+cor(data$LSATMedDiff, data$BU_Log_Apps)
+cor(data$GPAMedDiff, data$BU_Log_Apps)
+cor(data$UGDS, data$BU_Log_Apps)
+cor(data$X2020.Applied.Count, data$BU_Log_Apps)
+cor(data$X2020.Matriculant.Count, data$BU_Log_Apps)
+cor(data$distance, data$BU_Log_Apps)
 
 #Visualizing relationship between various predictors and the response variable
 plot(data$UGDS, data$BU_Log_Apps)
@@ -35,9 +45,26 @@ plot(data$LSATMedDiff, data$BU_Log_Apps)
 plot(data$GPAMedDiff, data$BU_Log_Apps)
 
 
-
-#Multiple Linear Regression
-model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$LSATMedDiff + data$GPAMedDiff)
+#Backward Elimination Multiple Linear Regression
+#Iteration 1
+model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$X2020.Matriculant.Count 
+           + data$distance+ data$LSATMedDiff + data$GPAMedDiff)
 summary(model)
-plot(data$BU_Log_Apps, model$residuals)
-abline(a = 0, b = 0, col = "red")
+#Iteration 2
+model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$X2020.Matriculant.Count 
+           + data$distance + data$LSATMedDiff)
+summary(model)
+#Iteration 3
+model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$distance + data$LSATMedDiff)
+summary(model)
+#Iteration 4
+model = lm(data$BU_Log_Apps ~ data$X2020.Applied.Count + data$distance + data$LSATMedDiff)
+summary(model)
+
+hist(resid(model))
+
+plot(fitted(model), model$residuals, pch = 19, col = "dodgerblue",
+     xlab = "Model Fitted Values",
+     ylab = "Model Residuals",
+     main = "Residual Plot of Multiple Linear Regression")
+abline(a = 0, b = 0, col = "red", lwd = 3)
