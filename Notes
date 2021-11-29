@@ -1,6 +1,15 @@
 To do:
 Show boxplot of raw response variable & histogram
 Show residual plots (y = residuals, x = response variable, use abline to add line for 0)
-Show histogram of residuals?
-Chose to apply log transformation.
-feature selection approaches: https://towardsdatascience.com/feature-selection-techniques-in-regression-model-26878fe0e24e
+Chose to apply log transformation to the dependent variable.
+Used backwards elimination
+# Residual Plots ( to assess linearity and constant variance
+# Check each explanatory variable , and the fitted values ( fitted ( m ) ) 
+# the linearity or variance .
+> plot(fitted(m) , resid(m) , axes = TRUE , frame . plot = TRUE , xlab = ’fitted values’ , ylab = ’Residual’)
+> plot(age , resid(m) , axes = TRUE , frame . plot = TRUE , xlab = ’age’ , ylab = ’Residual’ )
+> plot(height , resid(m) , axes = TRUE , frame . plot = TRUE , xlab = ’height’ , ylab= ’Residual’)
+
+
+Use ggplot for the regression line?
+interpretation of the coefficient https://data.library.virginia.edu/interpreting-log-transformations-in-a-linear-model/

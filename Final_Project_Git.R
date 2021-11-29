@@ -44,22 +44,31 @@ plot(data$distance, data$BU_Log_Apps)
 plot(data$LSATMedDiff, data$BU_Log_Apps)
 plot(data$GPAMedDiff, data$BU_Log_Apps)
 
+hist(data$distance)
+
 
 #Backward Elimination Multiple Linear Regression
 #Iteration 1
 model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$X2020.Matriculant.Count 
-           + data$distance+ data$LSATMedDiff + data$GPAMedDiff)
+           + data$LSATMedDiff + data$GPAMedDiff)
 summary(model)
 #Iteration 2
 model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$X2020.Matriculant.Count 
-           + data$distance + data$LSATMedDiff)
+           + data$LSATMedDiff)
 summary(model)
 #Iteration 3
-model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$distance + data$LSATMedDiff)
+model = lm(data$BU_Log_Apps ~ data$UGDS + data$X2020.Applied.Count + data$LSATMedDiff)
 summary(model)
 #Iteration 4
-model = lm(data$BU_Log_Apps ~ data$X2020.Applied.Count + data$distance + data$LSATMedDiff)
+model = lm(data$BU_Log_Apps ~ data$X2020.Applied.Count + data$LSATMedDiff)
 summary(model)
+anova(model)
+
+#Plot of regression
+plot(fitted(model), data$BU_Log_Apps, pch = 19, col = "dodgerblue",
+     xlab = "Model Fitted Values",
+     ylab = "Bu Log Transformed Apps",
+     main = "Plot of Multiple Linear Regression")
 
 hist(resid(model))
 
@@ -68,3 +77,31 @@ plot(fitted(model), model$residuals, pch = 19, col = "dodgerblue",
      ylab = "Model Residuals",
      main = "Residual Plot of Multiple Linear Regression")
 abline(a = 0, b = 0, col = "red", lwd = 3)
+
+#Global F test
+#Null hypothesis: There is no linear association at a = 0.05
+n = nrow(data)
+f_test = qf(.95, df1 = 2, df2 = n - 2 - 1)
+global_F = summary(model)$fstatistic[1]
+global_F >= f_test
+#Reject null hypothesis, there is a linear association at a = 0.05
+
+#Pairwise t test
+#Null hypothesis Beta 2020.Applied.Count = 0 
+n = nrow(data)
+df = n - 2 -1
+t_test = qt(0.975, df = df)
+model.summary = summary(model)
+Beta.Applied = model.summary$coefficients[2,1]
+SE.Applied = model.summary$coefficients[2,2]
+t.applied = Beta.Applied/SE.Applied
+t.applied >= t_test
+#Reject null hypothesis, 2020 Applied count is a significan predictor at a = 0.05
+
+#Pairwise t test
+#Null hypothesis Beta LSATMedDiff = 0 
+Beta.LSAT = model.summary$coefficients[3,1]
+SE.LSAT = model.summary$coefficients[3,2]
+t.LSAT = Beta.LSAT/SE.LSAT
+t.LSAT >= t_test
+#Reject null hypothesis, LSATMedDiff is a significan predictor at a = 0.05
