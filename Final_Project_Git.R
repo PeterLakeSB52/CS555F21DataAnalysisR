@@ -1,6 +1,9 @@
 #setwd("C:/Users/Peter's Laptop/Documents/CS555F21DataAnalysisR")
-install.packages("geosphere")
+#install.packages("geosphere")
+#install.packages('ggplot2')
+library(ggplot2)
 library(geosphere)
+
 
 #Read CSV files 
 data = read.csv("240_Feeder_data.csv", header = TRUE)
@@ -15,14 +18,23 @@ distance = distHaversine(cbind(lon, lat), cbind(BULon, BULat))
 data$distance = round((distance*0.000621371), 2)
 
 #Distribution of response variable
-hist(data$BU_2020_Apps)
-boxplot(data$BU_2020_Apps)
+Apps.hist = ggplot(data, aes(BU_2020_Apps)) + geom_histogram(binwidth = 1, fill = "dodgerblue")
+Apps.hist = Apps.hist + ggtitle("Histogram of BU Applications per Institution") +
+  xlab("# of Applications per Institution") + ylab("Frequency") + theme(plot.title = element_text(hjust = .5))
+Apps.hist
+Apps.box = ggplot(data, aes(BU_2020_Apps)) + geom_boxplot()
+Apps.box = Apps.box + xlab("# of Applications per Institution")
+Apps.box
 
 #Distribution of response variable after ln transformation
-hist(log(data$BU_2020_Apps))
 data$BU_Log_Apps = log(data$BU_2020_Apps)
 #Removing negative inf values
 data = data[data$BU_Log_Apps>=0,]
+Log.Apps.hist = ggplot(data, aes(BU_Log_Apps)) + geom_histogram(binwidth = 1, fill = "dodgerblue")
+Log.Apps.hist = Log.Apps.hist + ggtitle("Histogram of the Natural Log of BU Applications per Institution") +
+  xlab("ln(# of Applications per Institution)") + ylab("Frequency") + theme(plot.title = element_text(hjust = .5))
+Log.Apps.hist
+
 
 #Scatterplot matrix
 data = data[,c(4,7,8,9,16,10,11,12,13,14,15)]
@@ -35,17 +47,6 @@ cor(data$UGDS, data$BU_Log_Apps)
 cor(data$X2020.Applied.Count, data$BU_Log_Apps)
 cor(data$X2020.Matriculant.Count, data$BU_Log_Apps)
 cor(data$distance, data$BU_Log_Apps)
-
-#Visualizing relationship between various predictors and the response variable
-plot(data$UGDS, data$BU_Log_Apps)
-plot(data$X2020.Applied.Count, data$BU_Log_Apps)
-plot(data$X2020.Matriculant.Count, data$BU_Log_Apps)
-plot(data$distance, data$BU_Log_Apps)
-plot(data$LSATMedDiff, data$BU_Log_Apps)
-plot(data$GPAMedDiff, data$BU_Log_Apps)
-
-hist(data$distance)
-
 
 #Backward Elimination Multiple Linear Regression
 #Iteration 1
@@ -65,18 +66,29 @@ summary(model)
 anova(model)
 
 #Plot of regression
-plot(fitted(model), data$BU_Log_Apps, pch = 19, col = "dodgerblue",
-     xlab = "Model Fitted Values",
-     ylab = "Bu Log Transformed Apps",
-     main = "Plot of Multiple Linear Regression")
+model.plot = ggplot(data, aes(y = BU_Log_Apps, x = X2020.Applied.Count, color = LSATMedDiff))+geom_point()+stat_smooth(method="lm",se=FALSE)
+model.plot = model.plot + ggtitle("Plot of Multiple Linear Regression Model") +
+  xlab("# of Applicants (Nationally) for each Institution") + ylab("ln(# of Applications to BU)") + theme(plot.title = element_text(hjust = .5))
+model.plot
 
-hist(resid(model))
+#Residual Plots
+#Plot of model residuals
+Resid.hist = ggplot(model, aes(resid(model))) + geom_histogram(fill = "dodgerblue")
+Resid.hist = Resid.hist + ggtitle("Histogram of Model Residuals") +
+  xlab("Residual Values") + ylab("Frequency") + theme(plot.title = element_text(hjust = .5))
+Resid.hist
 
-plot(fitted(model), model$residuals, pch = 19, col = "dodgerblue",
-     xlab = "Model Fitted Values",
-     ylab = "Model Residuals",
-     main = "Residual Plot of Multiple Linear Regression")
-abline(a = 0, b = 0, col = "red", lwd = 3)
+#Fitted x resdiuals
+fittedresid.plot = ggplot(model, aes(y = resid(model), x = fitted(model)))+geom_point(colour = "dodgerblue")+geom_abline(intercept = 0, slope = 0, colour = "red")
+fittedresid.plot
+
+#2020Apps resdiuals
+Appsresid.plot = ggplot(data, aes(y = resid(model), x = X2020.Applied.Count))+geom_point(colour = "dodgerblue")+geom_abline(intercept = 0, slope = 0, colour = "red")
+Appsresid.plot
+
+#LSATMedDiff resdiuals
+LSATMedDiffresid.plot = ggplot(data, aes(y = resid(model), x = LSATMedDiff))+geom_point(colour = "dodgerblue")+geom_abline(intercept = 0, slope = 0, colour = "red")
+LSATMedDiffresid.plot
 
 #Global F test
 #Null hypothesis: There is no linear association at a = 0.05
@@ -96,7 +108,7 @@ Beta.Applied = model.summary$coefficients[2,1]
 SE.Applied = model.summary$coefficients[2,2]
 t.applied = Beta.Applied/SE.Applied
 t.applied >= t_test
-#Reject null hypothesis, 2020 Applied count is a significan predictor at a = 0.05
+#Reject null hypothesis, 2020 Applied count is a significant predictor at a = 0.05
 
 #Pairwise t test
 #Null hypothesis Beta LSATMedDiff = 0 
@@ -104,4 +116,4 @@ Beta.LSAT = model.summary$coefficients[3,1]
 SE.LSAT = model.summary$coefficients[3,2]
 t.LSAT = Beta.LSAT/SE.LSAT
 t.LSAT >= t_test
-#Reject null hypothesis, LSATMedDiff is a significan predictor at a = 0.05
+#Reject null hypothesis, LSATMedDiff is a significant predictor at a = 0.05
