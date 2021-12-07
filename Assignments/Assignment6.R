@@ -1,4 +1,6 @@
-#install.packages("aod")
+#install.packages("pROC")
+install.packages("aod")
+library(pROC)
 library(aod)
 
 setwd("C:/Users/Peter/Documents/CS555F21DataAnalysisR/Assignments")
@@ -40,3 +42,21 @@ OR
 exp(cbind(OR = coef(model), confint.default(model)))
 
 model.roc = roc(data$temp_level ~ data$sex)
+print(model.roc)
+
+#Logistic Regression w/ sex and heart rate as explanatory variables
+model = glm(data$temp_level ~ data$sex + data$Heart.rate, family = binomial)
+summary(model)
+
+#Global test of signiicance
+wald.test(b=coef(model), Sigma = vcov(model), Terms = 2:3)
+
+#Odds Ratios
+OR.sex = exp(as.double(model$coefficients[2]))
+OR.sex
+OR.heart.rate = exp(as.double(model$coefficients[3]*10))
+OR.heart.rate
+
+model.roc = roc(data$temp_level ~ data$sex + data$Heart.rate)
+print(model.roc)
+
