@@ -1,9 +1,9 @@
 #install.packages("pROC")
-install.packages("aod")
+#install.packages("aod")
 library(pROC)
 library(aod)
 
-setwd("C:/Users/Peter/Documents/CS555F21DataAnalysisR/Assignments")
+setwd("C:/Users/Peter's Laptop/Documents/CS555F21DataAnalysisR/Assignments")
 
 #Read CSV files 
 data = read.csv("Assignment6Data.csv", header = TRUE)
@@ -31,7 +31,7 @@ p
 #Add a dummy variable so that sex is [male = 0, female = 1]
 data$Sex_dummy = ifelse(data$sex == 2, 1, 0)
 
-model = glm(data$temp_level ~ data$sex, family = binomial)
+model = glm(data$temp_level ~ data$Sex_dummy, family = binomial)
 summary(model)
 
 1.4469 / 0.3911
@@ -41,11 +41,17 @@ OR
 
 exp(cbind(OR = coef(model), confint.default(model)))
 
-model.roc = roc(data$temp_level ~ data$sex)
+model.roc = roc(data$temp_level ~ data$Sex_dummy)
 print(model.roc)
 
+data$prob = predict(model, type=c("response"))
+g.1 = roc(data$temp_level ~ data$prob)
+g.1
+plot(g.1)
+
+
 #Logistic Regression w/ sex and heart rate as explanatory variables
-model = glm(data$temp_level ~ data$sex + data$Heart.rate, family = binomial)
+model = glm(data$temp_level ~ data$Sex_dummy + data$Heart.rate, family = binomial)
 summary(model)
 
 #Global test of signiicance
@@ -57,6 +63,10 @@ OR.sex
 OR.heart.rate = exp(as.double(model$coefficients[3]*10))
 OR.heart.rate
 
-model.roc = roc(data$temp_level ~ data$sex + data$Heart.rate)
+model.roc = roc(data$temp_level ~ data$Sex_dummy + data$Heart.rate)
 print(model.roc)
 
+data$prob = predict(model, type=c("response"))
+g.2 = roc(data$temp_level ~ data$prob)
+g.2
+plot(g.2)
